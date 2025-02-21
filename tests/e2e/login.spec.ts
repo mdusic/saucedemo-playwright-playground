@@ -10,28 +10,31 @@ import { test } from '../utils/test-helpers';
 test.describe('Login Functionality', () => {
     let loginPage: LoginPage;
 
-    test.beforeEach(async ({ page }) => {
-        loginPage = new LoginPage(page);
+    test.beforeEach(async ({ loginPage }) => {
         await loginPage.goto();
         // Verify we're on the login page before each test
         await loginPage.verifyLoginPage();
     });
 
-    test('should login successfully with valid credentials @smoke', async () => {
+    test('should login successfully with valid credentials @smoke', async ({ page, loginPage }) => {
         // When: User logs in with valid credentials
         await loginPage.login(
             loginData.validUser.username,
             loginData.validUser.password
         );
 
-        // Then: Login should be successful
-        await expect(async () => {
-            const isSuccessful = await loginPage.isLoginSuccessful();
-            expect(isSuccessful).toBe(true);
-        }).toPass({ timeout: 10000 });
+        // Then: Should be redirected to inventory page
+        await expect(page).toHaveURL(/.*inventory.html/);
+        
+        // And: Inventory container should be visible
+        await expect(page.locator('[data-test="inventory-container"]')).toBeVisible();
+        
+        // And: Page title should be correct
+        const title = await loginPage.getPageTitle();
+        expect(title).toBe(loginData.validUser.expectedTitle);
     });
 
-    test('should show error with invalid credentials @regression', async () => {
+    test('should show error with invalid credentials @regression', async ({ loginPage }) => {
         // When: User attempts to login with invalid credentials
         await loginPage.login(
             loginData.invalidUser.username,
@@ -43,7 +46,7 @@ test.describe('Login Functionality', () => {
         expect(errorMessage).toBe(loginData.invalidUser.expectedError);
     });
 
-    test('should show error for locked out user @regression', async () => {
+    test('should show error for locked out user @regression', async ({ loginPage }) => {
         // When: Locked out user attempts to login
         await loginPage.login(
             loginData.lockedUser.username,
@@ -55,7 +58,7 @@ test.describe('Login Functionality', () => {
         expect(errorMessage).toBe(loginData.lockedUser.expectedError);
     });
 
-    test('should maintain error message visibility @regression', async () => {
+    test('should maintain error message visibility @regression', async ({ loginPage }) => {
         // When: User attempts to login with invalid credentials
         await loginPage.login(
             loginData.invalidUser.username,
@@ -63,9 +66,7 @@ test.describe('Login Functionality', () => {
         );
 
         // Then: Error should remain visible
-        await expect(async () => {
-            const errorMessage = await loginPage.getErrorMessage();
-            expect(errorMessage).not.toBeNull();
-        }).toPass();
+        const isVisible = await loginPage.isErrorMessageVisible();
+        expect(isVisible).toBe(true);
     });
 });

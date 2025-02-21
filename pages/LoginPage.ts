@@ -11,7 +11,8 @@ export class LoginPage extends BasePage {
     private readonly passwordInput = '[data-test="password"]';
     private readonly loginButton = '[data-test="login-button"]';
     private readonly errorMessage = '[data-test="error"]';
-    private readonly inventoryContainer = '#inventory_container';
+    private readonly inventoryContainer = '[data-test="inventory-container"]';
+    private readonly pageTitle = '.title';
 
     constructor(page: Page) {
         super(page);
@@ -64,18 +65,11 @@ export class LoginPage extends BasePage {
      * @returns Promise<string | null> - Error message text or null if not present
      */
     async getErrorMessage(): Promise<string | null> {
-        if (await this.isElementVisible(this.errorMessage)) {
-            return this.getElementText(this.errorMessage);
+        const errorElement = this.page.locator(this.errorMessage);
+        if (await errorElement.isVisible()) {
+            return errorElement.textContent();
         }
         return null;
-    }
-
-    /**
-     * Check if login was successful
-     * @returns Promise<boolean> - True if login was successful
-     */
-    async isLoginSuccessful(): Promise<boolean> {
-        return this.isElementVisible(this.inventoryContainer);
     }
 
     /**
@@ -94,5 +88,23 @@ export class LoginPage extends BasePage {
         await expect(this.page.locator(this.usernameInput)).toBeVisible();
         await expect(this.page.locator(this.passwordInput)).toBeVisible();
         await expect(this.page.locator(this.loginButton)).toBeVisible();
+    }
+
+    /**
+     * Get the page title text
+     */
+    async getPageTitle(): Promise<string | null> {
+        const titleElement = this.page.locator(this.pageTitle);
+        if (await titleElement.isVisible()) {
+            return titleElement.textContent();
+        }
+        return null;
+    }
+
+    /**
+     * Check if error message is visible
+     */
+    async isErrorMessageVisible(): Promise<boolean> {
+        return this.page.locator(this.errorMessage).isVisible();
     }
 }
