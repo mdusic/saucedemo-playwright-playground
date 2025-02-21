@@ -213,3 +213,25 @@ Test reports are automatically generated after each test run and can be found in
 ## 🔄 CI/CD
 
 Tests are automatically run on every push to the repository using GitHub Actions. Check the `.github/workflows` directory for the configuration.
+
+## 🏷️ Test Tags
+
+We use the following tags to organize our tests:
+
+- `@smoke`: Critical path tests that should run on every commit
+- `@regression`: Comprehensive tests for thorough validation
+- `@visual`: Visual regression tests
+- `@api`: API integration tests
+
+Run specific test suites:
+
+```bash
+# Run smoke tests
+npm run test:smoke
+
+# Run regression tests
+npm run test:regression
+
+# Run all tests
+npm run test
+```
