@@ -24,8 +24,8 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html'],
-    process.env.CI ? 'github' : undefined
-  ],
+    process.env.CI ? ['github'] : undefined
+  ].filter(Boolean) as Array<'html' | ['github']>,
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
