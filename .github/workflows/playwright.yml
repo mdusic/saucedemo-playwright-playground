@@ -48,9 +48,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: playwright-report-${{ matrix.shard }}
-        path: |
-          playwright-report
-          test-results
+        path: playwright-report
         retention-days: 30
 
   # Job to merge test reports from all shards
@@ -70,17 +68,28 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
+    - name: Create directories
+      run: |
+        mkdir -p playwright-reports
+        mkdir -p merged-report
+
     - name: Download artifacts
       uses: actions/download-artifact@v4
       with:
+        path: playwright-reports
         pattern: playwright-report-*
-        path: all-artifacts
-        merge-multiple: true
+        merge-multiple: false
+
+    - name: List downloaded artifacts
+      run: ls -R playwright-reports
 
     - name: Merge reports
       run: |
-        mkdir -p merged-report
-        npx playwright merge-reports ./all-artifacts --reporter html ./merged-report
+        for report in playwright-reports/playwright-report-*; do
+          if [ -d "$report" ]; then
+            cp -r "$report"/* merged-report/
+          fi
+        done
 
     - name: Upload merged report
       uses: actions/upload-artifact@v4
