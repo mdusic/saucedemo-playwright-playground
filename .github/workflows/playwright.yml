@@ -1,14 +1,13 @@
 name: Playwright Tests
 
-# Triggers (when the workflow will run)
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:  # Allows manual trigger from GitHub UI
+  workflow_dispatch:
   schedule:
-    - cron: '0 0 * * 1'  # Run weekly on Mondays
+    - cron: '0 0 * * 1'
 
 jobs:
   test:
@@ -16,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      # Keep running even if one matrix job fails
       fail-fast: false
       matrix:
         shard: [1, 2, 3]
@@ -28,7 +26,7 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 18
-        cache: 'npm'  # Enable npm cache
+        cache: 'npm'
 
     - name: Install dependencies
       run: npm ci
@@ -37,28 +35,29 @@ jobs:
       run: npx playwright install --with-deps
 
     - name: Run Playwright tests
-      run: npx playwright test --shard ${{ matrix.shard }}/3
+      run: npx playwright test --shard ${{ matrix.shard }}/3 --reporter=html
       env:
         CI: true
-        # Add any environment variables your tests need
         BASE_URL: https://www.saucedemo.com
 
     - name: Upload test results
-      if: always()  # Upload results even if tests fail
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: playwright-report-${{ matrix.shard }}
-        path: playwright-report
+        path: |
+          playwright-report
+          test-results
         retention-days: 30
 
-  # Job to merge test reports from all shards
   merge-reports:
     if: always()
     needs: test
     runs-on: ubuntu-latest
+    
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -68,30 +67,30 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Create directories
-      run: |
-        mkdir -p playwright-reports
-        mkdir -p merged-report
-
     - name: Download artifacts
       uses: actions/download-artifact@v4
       with:
-        path: playwright-reports
         pattern: playwright-report-*
-        merge-multiple: false
+        merge-multiple: true
+        path: all-reports
 
-    - name: List downloaded artifacts
-      run: ls -R playwright-reports
+    - name: Install Playwright
+      run: npx playwright install
 
     - name: Merge reports
       run: |
-        for report in playwright-reports/playwright-report-*; do
-          if [ -d "$report" ]; then
-            cp -r "$report"/* merged-report/
-          fi
-        done
+        mkdir -p merged-report
+        if [ -d "all-reports" ]; then
+          echo "Reports found, merging..."
+          npx playwright merge-reports --reporter html ./all-reports
+          mv playwright-report/* merged-report/
+        else
+          echo "No reports found to merge"
+          exit 1
+        fi
 
     - name: Upload merged report
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: playwright-merged-report
