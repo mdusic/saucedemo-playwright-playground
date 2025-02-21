@@ -24,18 +24,18 @@ jobs:
         shardIndex: [1, 2, 3]
         
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0  # Fetch all history for proper git history
 
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: 18
         cache: 'npm'  # Enable npm cache
 
     - name: Cache Playwright browsers
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/ms-playwright
         key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
@@ -57,7 +57,7 @@ jobs:
 
     - name: Upload test results
       if: always()  # Upload results even if tests fail
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: playwright-report-shard-${{ matrix.shardIndex }}
         path: |
@@ -71,12 +71,13 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Download all artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         path: all-artifacts
+        merge-multiple: true
 
     - name: Merge reports
       run: |
@@ -84,7 +85,7 @@ jobs:
         npx playwright merge-reports ./all-artifacts/playwright-report-*
 
     - name: Upload merged report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: playwright-merged-report
         path: playwright-report
