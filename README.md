@@ -139,23 +139,21 @@ Tests are automatically run on every push to the repository using GitHub Actions
 
 ## 🏷️ Test Tags
 
-We use tags to categorize our tests:
-- `@smoke`: Critical path tests, run on every PR
-- `@regression`: Full test suite, run nightly
-- `@flaky`: Tests that need investigation
+We use the following tags to organize our tests:
 
-## 🚀 Running Tests
+- `@smoke`: Critical path tests that should run on every commit
+- `@regression`: Comprehensive tests for thorough validation
+- `@visual`: Visual regression tests
+- `@api`: API integration tests
+
+Run specific test suites:
 
 ```bash
+# Run smoke tests
+npm run test:smoke
+
+# Run regression tests
+npm run test:regression
+
 # Run all tests
-npx playwright test
-
-# Run smoke tests only
-npx playwright test --grep @smoke
-
-# Run tests in headed mode (visible browser)
-npx playwright test --headed
-
-# Run a specific test file
-npx playwright test login.spec.ts
-```
+npm run test

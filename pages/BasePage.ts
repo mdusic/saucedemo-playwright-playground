@@ -5,7 +5,11 @@ import { Page } from '@playwright/test';
  * This helps avoid duplicating code across different page classes.
  */
 export class BasePage {
-    constructor(protected page: Page) {}
+    protected readonly page: Page;
+
+    constructor(page: Page) {
+        this.page = page;
+    }
 
     /**
      * Click the first element that matches the selector
@@ -33,5 +37,16 @@ export class BasePage {
      */
     protected async waitForNavigation() {
         await this.page.waitForLoadState('networkidle');
+    }
+
+    /**
+     * Types text into an input field with a delay
+     * @param selector - The input selector
+     * @param text - The text to type
+     * @param delay - Delay between keystrokes in milliseconds
+     */
+    protected async typeWithDelay(selector: string, text: string, delay = 100) {
+        await this.waitForElement(selector);
+        await this.page.locator(selector).type(text, { delay });
     }
 }

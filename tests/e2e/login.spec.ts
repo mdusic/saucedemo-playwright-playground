@@ -29,8 +29,9 @@ test.describe('Login Functionality', () => {
         // And: Inventory container should be visible
         await expect(page.locator('[data-test="inventory-container"]')).toBeVisible();
         
-        // And: Header should show correct title
-        await expect(page.locator('[data-test="title"]')).toHaveText('Products');
+        // And: Page title should be correct
+        const title = await loginPage.getPageTitle();
+        expect(title).toBe(loginData.validUser.expectedTitle);
     });
 
     test('should show error with invalid credentials @regression', async ({ loginPage }) => {
