@@ -39,16 +39,3 @@ jobs:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
-        
-    # Note: To enable Slack notifications, you need to:
-    # 1. Create a Slack app and get the webhook URL
-    # 2. Add the webhook URL as a secret in GitHub (Settings > Secrets > Actions > New repository secret)
-    # 3. Name the secret SLACK_WEBHOOK_URL
-    - name: Send Slack notification
-      if: failure()
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-        fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
