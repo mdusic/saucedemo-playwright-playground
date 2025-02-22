@@ -68,147 +68,70 @@ fix(checkout): resolve flaky payment validation
 └── playwright.config.ts    # Playwright configuration
 ```
 
-## 🧪 Page Object Model Structure
+## 🧪 Page Object Model Best Practices
 
-Each page object should:
-1. Encapsulate selectors
-2. Provide high-level actions
-3. Include validation methods
+1. **Selector Priority**
+   - Use data-test attributes as the first choice: `[data-test="login-button"]`
+   - Use ARIA roles when appropriate: `getByRole('button', { name: 'Open Menu' })`
+   - Only use classes/IDs when no better option exists
 
-Example:
-```typescript
-class LoginPage {
-  // Selectors as private fields
-  private readonly usernameInput = ...;
-  
-  // Public actions
-  async login(username: string, password: string) {
-    await this.enterUsername(username);
-    await this.enterPassword(password);
-    await this.clickLogin();
-  }
-  
-  // Validation methods
-  async isErrorVisible(): Promise<boolean> {
-    return await this.errorMessage.isVisible();
-  }
-}
-```
+2. **Page Object Structure**
+   ```typescript
+   class ProductsPage {
+     // Selectors as private readonly fields
+     private readonly addToCartButton = '[data-test="add-to-cart"]';
+     
+     // Simple, focused methods
+     async addProductToCart(productName: string) {
+       const selector = `[data-test="add-to-cart-${productName}"]`;
+       await this.clickFirstElement(selector);
+     }
+     
+     // Methods return promises when async
+     async getCartQuantity(): Promise<number> {
+       return await this.page.locator(this.removeButtons).count();
+     }
+   }
+   ```
+
+3. **Test Structure**
+   ```typescript
+   test('should add product to cart @smoke', async () => {
+     // Given: Start from a known state
+     await loginPage.login(username, password);
+     
+     // When: Perform the action
+     await productsPage.addProductToCart('Sauce Labs Backpack');
+     
+     // Then: Verify the result
+     const quantity = await productsPage.getCartQuantity();
+     expect(quantity).toBe(1, 'Cart should show 1 item');
+   });
+   ```
 
 ## 🔍 Pull Request Guidelines
 
 1. PR Title Format: `[Type] Description`
    Example: `[Test] Add checkout flow validation`
 
-2. PR Description should include:
-   - Purpose of changes
-   - Test scenarios covered
-   - Any known limitations
-   - Screenshots (if UI changes)
+2. PR Description Template:
+   ```markdown
+   ## Changes
+   - Added new test for...
+   - Updated selector to use data-test...
+   - Simplified login page methods...
 
-3. PR Checklist:
-   - [ ] Tests pass locally
-   - [ ] No flaky tests
-   - [ ] Code follows POM pattern
-   - [ ] Documentation updated
-   - [ ] PR is small and focused
-
-## 🛠️ Test Data Management
-
-1. Use fixtures for test data
-2. Implement data isolation
-3. Use environment variables for configuration
-
-## 📝 Environment Variables
-
-```bash
-BASE_URL=https://www.saucedemo.com
-DEFAULT_PASSWORD=secret_sauce
-TEST_ENV=staging
-```
-
-## 🚀 Running Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run specific test file
-npx playwright test login.spec.ts
-
-# Run tests in headed mode
-npx playwright test --headed
-```
-
-## 👥 Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## 📋 PR Template
-
-When creating a PR, use our template in `.github/pull_request_template.md`
-
-## 🚀 Features
-
-- End-to-End tests for key user flows
-- Data-driven testing
-- API mocking capabilities
-- Visual regression testing
-- CI/CD integration with GitHub Actions
-
-## 📁 Project Structure
-
-```
-├── tests/
-│   ├── e2e/           # End-to-end test scenarios
-│   ├── api/           # API testing and mocking
-│   ├── visual/        # Visual regression tests
-│   └── data/          # Test data files
-├── pages/             # Page Object Models
-├── fixtures/          # Test fixtures and common setup
-├── utils/             # Helper functions and utilities
-└── config/            # Environment configurations
-```
-
-## 🛠️ Setup
-
-1. Install dependencies:
-   ```bash
-   npm install
+   ## Testing
+   - [ ] All tests pass locally
+   - [ ] No flaky tests introduced
+   - [ ] Code follows best practices
    ```
 
-2. Install Playwright browsers:
-   ```bash
-   npx playwright install
-   ```
-
-3. Run tests:
-   ```bash
-   # Run all tests
-   npm test
-
-   # Run specific test file
-   npx playwright test tests/e2e/login.spec.ts
-
-   # Run tests with UI mode
-   npx playwright test --ui
-   ```
-
-## 🧪 Test Categories
-
-- **Authentication Tests**: Login/Logout flows
-- **Shopping Cart Tests**: Add/Remove items, Cart management
-- **Checkout Tests**: Complete purchase flow
-- **Visual Tests**: UI consistency checks
-- **API Mock Tests**: Various API response scenarios
-
-## 📊 Reports
-
-Test reports are automatically generated after each test run and can be found in the `playwright-report` directory.
+3. Review Checklist:
+   - Tests are clear and focused
+   - Selectors use data-test attributes where possible
+   - Code is well-commented and easy to understand
+   - No unnecessary complexity
 
 ## 🔄 CI/CD
 
@@ -234,4 +157,3 @@ npm run test:regression
 
 # Run all tests
 npm run test
-```

@@ -1,8 +1,8 @@
 import { Page } from '@playwright/test';
 
 /**
- * Base page object that all other page objects should extend.
- * Contains common functionality and utilities used across pages.
+ * BasePage provides common functionality that all page objects can use.
+ * This helps avoid duplicating code across different page classes.
  */
 export class BasePage {
     protected readonly page: Page;
@@ -12,58 +12,41 @@ export class BasePage {
     }
 
     /**
-     * Waits for navigation to complete after an action
+     * Click the first element that matches the selector
+     * @param selector - The selector to find the element
+     */
+    protected async clickFirstElement(selector: string) {
+        await this.waitForElement(selector);
+        await this.page.locator(selector).first().click();
+    }
+
+    /**
+     * Wait for element(s) to be visible on the page
+     * @param selector - The selector to find the element(s)
+     * @param timeout - How long to wait (in milliseconds) before giving up
+     */
+    protected async waitForElement(selector: string, timeout = 10000) {
+        await this.page.locator(selector).first().waitFor({ 
+            state: 'visible', 
+            timeout 
+        });
+    }
+
+    /**
+     * Wait for page navigation to complete
      */
     protected async waitForNavigation() {
         await this.page.waitForLoadState('networkidle');
     }
 
     /**
-     * Checks if an element is visible
-     * @param selector - The selector to check
-     * @returns Promise<boolean> - Whether the element is visible
-     */
-    protected async isElementVisible(selector: string): Promise<boolean> {
-        const element = this.page.locator(selector);
-        return await element.isVisible();
-    }
-
-    /**
-     * Gets text content of an element
-     * @param selector - The selector to get text from
-     * @returns Promise<string> - The text content
-     */
-    protected async getElementText(selector: string): Promise<string> {
-        const element = this.page.locator(selector);
-        return await element.textContent() || '';
-    }
-
-    /**
-     * Clicks an element and waits for navigation
-     * @param selector - The selector to click
-     */
-    protected async clickAndWaitForNavigation(selector: string) {
-        await Promise.all([
-            this.page.waitForNavigation(),
-            this.page.click(selector)
-        ]);
-    }
-
-    /**
      * Types text into an input field with a delay
      * @param selector - The input selector
      * @param text - The text to type
+     * @param delay - Delay between keystrokes in milliseconds
      */
-    protected async typeWithDelay(selector: string, text: string) {
-        await this.page.locator(selector).type(text, { delay: 100 });
-    }
-
-    /**
-     * Waits for an element to be visible
-     * @param selector - The selector to wait for
-     * @param timeout - Optional timeout in milliseconds
-     */
-    protected async waitForElement(selector: string, timeout?: number) {
-        await this.page.locator(selector).waitFor({ state: 'visible', timeout });
+    protected async typeWithDelay(selector: string, text: string, delay = 100) {
+        await this.waitForElement(selector);
+        await this.page.locator(selector).type(text, { delay });
     }
 }

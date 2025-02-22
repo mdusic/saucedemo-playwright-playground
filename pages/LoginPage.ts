@@ -2,11 +2,11 @@ import { Page, expect } from '@playwright/test';
 import { BasePage } from './BasePage';
 
 /**
- * Page object for the login page
+ * Page Object Model class for the Login page
  * Contains all interactions and verifications for the login functionality
  */
 export class LoginPage extends BasePage {
-    // Selectors as private readonly fields for better maintainability
+    // Selectors using data-test attributes for better maintainability
     private readonly usernameInput = '[data-test="username"]';
     private readonly passwordInput = '[data-test="password"]';
     private readonly loginButton = '[data-test="login-button"]';
