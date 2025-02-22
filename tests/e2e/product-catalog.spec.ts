@@ -23,7 +23,7 @@ test.describe('Product Catalog Tests', () => {
         
         // Check that cart shows 1 item
         const cartQuantity = await productsPage.getCartQuantity();
-        test.expect(cartQuantity).toBe(1, 'Cart should show 1 item');
+        await test.expect(cartQuantity, 'Cart should show 1 item').toBe(1);
     });
 
     // Test 2: Remove a product from cart
@@ -36,7 +36,7 @@ test.describe('Product Catalog Tests', () => {
         
         // Check that cart is empty (0 items)
         const cartQuantity = await productsPage.getCartQuantity();
-        test.expect(cartQuantity).toBe(0, 'Cart should be empty');
+        await test.expect(cartQuantity, 'Cart should be empty').toBe(0);
     });
 
     // Test 3: Check that product sorting works
@@ -47,10 +47,8 @@ test.describe('Product Catalog Tests', () => {
         
         // Check each price is higher than the next one
         for (let i = 1; i < highToLowPrices.length; i++) {
-            test.expect(highToLowPrices[i-1]).toBeGreaterThanOrEqual(
-                highToLowPrices[i],
-                'Products should be sorted high to low'
-            );
+            await test.expect(highToLowPrices[i-1], 'Products should be sorted high to low')
+                .toBeGreaterThanOrEqual(highToLowPrices[i]);
         }
 
         // Then sort products from lowest to highest price
@@ -59,10 +57,8 @@ test.describe('Product Catalog Tests', () => {
         
         // Check each price is lower than the next one
         for (let i = 1; i < lowToHighPrices.length; i++) {
-            test.expect(lowToHighPrices[i-1]).toBeLessThanOrEqual(
-                lowToHighPrices[i],
-                'Products should be sorted low to high'
-            );
+            await test.expect(lowToHighPrices[i-1], 'Products should be sorted low to high')
+                .toBeLessThanOrEqual(lowToHighPrices[i]);
         }
     });
 
@@ -74,7 +70,7 @@ test.describe('Product Catalog Tests', () => {
         
         // Check that cart shows 2 items
         const cartQuantity = await productsPage.getCartQuantity();
-        test.expect(cartQuantity).toBe(2, 'Cart should show 2 items');
+        await test.expect(cartQuantity, 'Cart should show 2 items').toBe(2);
 
         // Remove both products
         await productsPage.removeProductFromCart('Sauce Labs Backpack');
@@ -82,7 +78,7 @@ test.describe('Product Catalog Tests', () => {
         
         // Check that cart is empty again
         const finalQuantity = await productsPage.getCartQuantity();
-        test.expect(finalQuantity).toBe(0, 'Cart should be empty after removing items');
+        await test.expect(finalQuantity, 'Cart should be empty after removing items').toBe(0);
     });
 
     // Test 5: Check cart navigation
@@ -97,6 +93,6 @@ test.describe('Product Catalog Tests', () => {
         
         // Check that cart shows 2 items
         const cartQuantity = await productsPage.getCartQuantity();
-        test.expect(cartQuantity).toBe(2, 'Cart should show 2 items');
+        await test.expect(cartQuantity, 'Cart should show 2 items').toBe(2);
     });
 });
