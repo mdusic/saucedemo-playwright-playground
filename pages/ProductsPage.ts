@@ -82,6 +82,13 @@ export class ProductsPage extends BasePage {
     }
 
     /**
+     * Go to the cart page
+     */
+    async goToCart(): Promise<void> {
+        await this.page.locator(this.cartLink).click();
+    }
+
+    /**
      * Sort the products on the page
      * @param order - How to sort: 'za' (Z to A), 'lohi' (price low to high), 'hilo' (price high to low)
      */
