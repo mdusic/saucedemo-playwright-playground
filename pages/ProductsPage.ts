@@ -21,6 +21,11 @@ export class ProductsPage extends BasePage {
     private readonly continueShoppingButton = '[data-test="continue-shopping"]';
     private readonly burgerMenu = 'button:has-text("Open Menu")';
     private readonly inventorySidebarLink = '[data-test="inventory-sidebar-link"]';
+    private readonly cartList = '[data-test="cart-list"]';
+    private readonly removeFromCartButton = (itemName: string) => 
+        `[data-test="remove-${itemName.toLowerCase().replace(/[()]/g, '\\$&').replace(/\s+/g, '-')}"]`;
+    private readonly cartItem = (itemName: string) => 
+        `//div[@class="cart_item" and contains(., "${itemName}")]`;
 
     constructor(page: Page) {
         super(page);
@@ -109,5 +114,15 @@ export class ProductsPage extends BasePage {
         const prices = await this.page.locator(this.itemPrices).allTextContents();
         // Convert price texts to numbers by removing the "$" and parsing
         return prices.map(price => parseFloat(price.replace('$', '')));
+    }
+
+    async verifyItemInCart(itemName: string): Promise<boolean> {
+        await this.goToCart(); // Ensure we're on the cart page
+        const cartItem = this.page.locator(this.cartItem(itemName));
+        return cartItem.isVisible();
+    }
+
+    async removeFromCart(itemName: string) {
+        await this.page.locator(this.removeFromCartButton(itemName)).click();
     }
 }
