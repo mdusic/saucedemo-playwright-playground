@@ -1,6 +1,8 @@
 import { test as base, expect } from '@playwright/test';
 import { LoginPage } from '../../pages/LoginPage';
-import { loginData } from '../data/login-data';
+import { users, loginErrors } from '../data/users.data';
+import { loginLocators } from '../locators/login.locators';
+import { inventoryLocators } from '../locators/inventory.locators';
 import { test } from '../utils/test-helpers';
 
 /**
@@ -8,8 +10,6 @@ import { test } from '../utils/test-helpers';
  * Tests various login scenarios including successful and failed attempts
  */
 test.describe('Login Functionality', () => {
-    let loginPage: LoginPage;
-
     test.beforeEach(async ({ loginPage }) => {
         await loginPage.goto();
         // Verify we're on the login page before each test
@@ -19,54 +19,53 @@ test.describe('Login Functionality', () => {
     test('should login successfully with valid credentials @smoke', async ({ page, loginPage }) => {
         // When: User logs in with valid credentials
         await loginPage.login(
-            loginData.validUser.username,
-            loginData.validUser.password
+            users.standard.username,
+            users.standard.password
         );
 
         // Then: Should be redirected to inventory page
         await expect(page).toHaveURL(/.*inventory.html/);
         
         // And: Inventory container should be visible
-        await expect(page.locator('[data-test="inventory-container"]')).toBeVisible();
+        await expect(page.locator(inventoryLocators.inventoryContainer)).toBeVisible();
         
         // And: Page title should be correct
         const title = await loginPage.getPageTitle();
-        expect(title).toBe(loginData.validUser.expectedTitle);
+        expect(title).toBe(users.standard.expectedTitle);
     });
 
     test('should show error with invalid credentials @regression', async ({ loginPage }) => {
         // When: User attempts to login with invalid credentials
         await loginPage.login(
-            loginData.invalidUser.username,
-            loginData.invalidUser.password
+            'invalid_user',
+            'wrong_password'
         );
 
         // Then: Error message should be displayed
         const errorMessage = await loginPage.getErrorMessage();
-        expect(errorMessage).toBe(loginData.invalidUser.expectedError);
+        expect(errorMessage).toBe(loginErrors.invalidCredentials);
     });
 
     test('should show error for locked out user @regression', async ({ loginPage }) => {
         // When: Locked out user attempts to login
         await loginPage.login(
-            loginData.lockedUser.username,
-            loginData.lockedUser.password
+            users.locked.username,
+            users.locked.password
         );
 
-        // Then: Appropriate error message should be displayed
+        // Then: Error message should be displayed
         const errorMessage = await loginPage.getErrorMessage();
-        expect(errorMessage).toBe(loginData.lockedUser.expectedError);
+        expect(errorMessage).toBe(users.locked.expectedError);
     });
 
-    test('should maintain error message visibility @regression', async ({ loginPage }) => {
+    test('should maintain error message visibility @regression', async ({ page, loginPage }) => {
         // When: User attempts to login with invalid credentials
         await loginPage.login(
-            loginData.invalidUser.username,
-            loginData.invalidUser.password
+            'invalid_user',
+            'wrong_password'
         );
 
         // Then: Error should remain visible
-        const isVisible = await loginPage.isErrorMessageVisible();
-        expect(isVisible).toBe(true);
+        await expect(page.locator(loginLocators.errorMessage)).toBeVisible();
     });
 });
