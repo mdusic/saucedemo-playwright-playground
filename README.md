@@ -157,3 +157,78 @@ npm run test:regression
 
 # Run all tests
 npm run test
+
+## 🚀 Performance Testing
+
+Our test suite includes performance and resilience tests for different user types:
+
+### User Types and Expectations
+
+1. **Standard User**
+   - Page load time: < 3000ms
+   - Click response time: < 1000ms
+   - All images should load properly with correct dimensions
+
+2. **Performance Glitch User**
+   - Page load time: 3000ms - 15000ms (intentionally slower)
+   - Click response time: < 5000ms
+   - Images should eventually load properly
+
+3. **Problem User**
+   - Page load time: < 3000ms
+   - Click response time: < 2000ms
+   - Expected to have image loading issues
+
+### Performance Test Tags
+
+- `@performance`: Tests that verify loading times and responsiveness
+- `@resilience`: Tests that verify behavior under problematic conditions
+
+Run performance tests:
+```bash
+# Run all performance tests
+npm test tests/e2e/performance.spec.ts
+
+# Run only performance-tagged tests
+npx playwright test --grep @performance
+```
+
+### Performance Testing Strategy
+
+1. **Page Load Performance**
+   - Measures time from navigation start to first image visible
+   - Adapts expectations based on user type
+   - Handles network state differently for performance user
+
+2. **Click Performance**
+   - Uses retry mechanism with exponential backoff
+   - Verifies both success and timing of interactions
+   - Adjusts retry attempts based on user type
+
+3. **Image Loading**
+   - Verifies image visibility and proper loading
+   - Checks image dimensions for standard user
+   - Handles expected failures for problem user
+   - Ensures eventual loading for performance user
+
+### Helper Functions
+
+The `performanceHelpers` module provides utilities for:
+- Retrying actions with exponential backoff
+- Checking image load status
+- Verifying image dimensions
+
+Example usage:
+```typescript
+// Retry clicking with exponential backoff
+const result = await performanceHelpers.retryClick(page, selector, {
+    maxAttempts: 3,
+    initialDelay: 100,
+    maxDelay: 1000
+});
+
+// Check if image is properly loaded
+const isLoaded = await performanceHelpers.checkImageLoaded(page, selector);
+
+// Get image dimensions
+const dimensions = await performanceHelpers.getImageDimensions(page, selector);
