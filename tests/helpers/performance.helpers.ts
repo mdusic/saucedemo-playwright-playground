@@ -124,7 +124,7 @@ export const performanceHelpers = {
             };
             
             // Determine error info for failed images
-            let errorInfo = undefined;
+            let errorInfo: string | undefined = undefined;
             if (!isLoaded) {
                 if (img.complete && img.naturalWidth === 0) {
                     errorInfo = 'Image failed to load (naturalWidth is 0)';
