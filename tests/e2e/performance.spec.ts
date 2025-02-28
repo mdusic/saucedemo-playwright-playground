@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { performanceHelpers } from '../helpers/performance.helpers';
+import { performanceHelpers } from '../helpers';
 import { inventoryLocators } from '../locators/inventory.locators';
 import { loginLocators } from '../locators/login.locators';
 import { users } from '../data/users.data';
@@ -48,39 +48,52 @@ for (const [userType, userData] of Object.entries({
         });
 
         test('should exhibit expected page load performance @performance', async ({ page }) => {
+            // Set a longer timeout for this test based on user type
             test.setTimeout(expectations.testTimeout);
             
+            // Start measuring page load time
             const start = Date.now();
             
-            // Navigate to inventory page
+            // Navigate to inventory page - only wait for DOM to be ready initially
             await page.goto('/inventory.html', { waitUntil: 'domcontentloaded' });
             
+            // For normal users, we want to wait until the network is fully idle
+            // For performance glitch users, we skip this wait as they're intentionally slow
             if (userType !== 'performance') {
+                // Wait for all network activity to finish for standard users
                 await page.waitForLoadState('networkidle');
             }
             
-            // Wait for inventory container with appropriate timeout
+            // Wait for the main inventory container to be visible
+            // Using appropriate timeout based on user type
             await expect(page.locator(inventoryLocators.inventoryContainer)).toBeVisible({
                 timeout: expectations.waitTimeout
             });
 
-            // Wait for first image to be visible
+            // Wait for the first product image to be visible
+            // This is a key indicator that the page is usable
             const firstImage = page.locator(`${inventoryLocators.products.backpack.imageLink} img`);
             await firstImage.waitFor({ 
                 state: 'visible',
                 timeout: expectations.waitTimeout
             });
             
+            // Calculate total load time and log it
             const loadTime = Date.now() - start;
             console.log(`Page load time (${userType}): ${loadTime}ms`);
 
+            // Verify the load time meets our expectations
             if (userType === 'performance') {
-                // For performance user, we expect slower loading
+                // For performance glitch user:
+                // 1. Should be slower than standard (minimum threshold)
+                // 2. But not too slow (maximum threshold)
                 expect(loadTime, 'Performance user loaded too quickly')
                     .toBeGreaterThan(expectations.minLoadTime);
                 expect(loadTime, `Load time (${loadTime}ms) exceeded maximum (${expectations.maxLoadTime}ms)`)
                     .toBeLessThan(expectations.maxLoadTime);
             } else {
+                // For standard and problem users:
+                // Should be faster than the maximum threshold
                 expect(loadTime, `Page load time (${loadTime}ms) exceeded maximum (${expectations.maxLoadTime}ms)`)
                     .toBeLessThan(expectations.maxLoadTime);
             }
@@ -119,41 +132,50 @@ for (const [userType, userData] of Object.entries({
 
             // Test each product image
             for (const [name, product] of Object.entries(inventoryLocators.products)) {
-                const selector = `${product.imageLink} img`;
-                const image = page.locator(selector);
+                const imageSelector = `${product.imageLink} img`;
+                const productName = product.name || name;
                 
+                console.log(`Checking image for ${productName}...`);
+                
+                // Try to wait for the image with appropriate timeout
                 try {
-                    // Wait for image to be visible
-                    await image.waitFor({ 
-                        state: 'visible', 
-                        timeout: expectations.imageLoadTimeout 
+                    await page.waitForSelector(imageSelector, { 
+                        state: 'visible',
+                        timeout: expectations.imageLoadTimeout
                     });
-
-                    if (userType === 'standard') {
-                        // For standard user, verify image dimensions
-                        const dimensions = await performanceHelpers.getImageDimensions(page, selector);
+                    
+                    // Use enhanced image check function to get detailed status
+                    const imageStatus = await performanceHelpers.checkImageLoaded(page, imageSelector);
+                    
+                    console.log(`Image status for ${productName}:`, JSON.stringify(imageStatus, null, 2));
+                    
+                    if (userType === 'problem' && expectations.expectedImageIssues) {
+                        // For problem user, we expect some images might not load correctly
+                        console.log(`Problem user image check - expected issues: ${imageStatus.errorInfo || 'none'}`);
+                    } else {
+                        // For standard and performance users, images should eventually load
+                        if (!imageStatus.loaded) {
+                            console.error(`Image failed to load properly: ${imageStatus.errorInfo}`);
+                            
+                            if (imageStatus.exists && imageStatus.dimensions) {
+                                console.error(`Image dimensions: ${JSON.stringify(imageStatus.dimensions)}`);
+                            }
+                        }
                         
-                        // Images should have actual dimensions
-                        expect(dimensions.width, `Image ${name} has no display width`)
-                            .toBeGreaterThan(0);
-                        expect(dimensions.height, `Image ${name} has no display height`)
-                            .toBeGreaterThan(0);
-                        expect(dimensions.naturalWidth, `Image ${name} has no natural width`)
-                            .toBeGreaterThan(0);
-                        expect(dimensions.naturalHeight, `Image ${name} has no natural height`)
-                            .toBeGreaterThan(0);
-                    } else if (userType === 'performance') {
-                        // For performance user, verify image loads properly
-                        const isLoaded = await performanceHelpers.checkImageLoaded(page, selector);
-                        expect(isLoaded, `Image ${name} failed to load properly`)
-                            .toBe(true);
+                        // Only assert for non-problem users to avoid test failures
+                        // for users that are expected to have image issues
+                        expect(imageStatus.loaded, 
+                            `Product image for ${productName} should load correctly`).toBeTruthy();
                     }
+                    
                 } catch (error) {
-                    if (userType !== 'problem') {
-                        throw error; // Re-throw for standard and performance users
+                    if (userType === 'problem' && expectations.expectedImageIssues) {
+                        // Expected for problem user, so just log it
+                        console.log(`Expected image timeout for problem user: ${productName}`);
+                    } else {
+                        // Unexpected timeout for standard/performance user
+                        throw error;
                     }
-                    // For problem user, log the error but continue
-                    console.log(`Expected image issue for problem user: ${name}`);
                 }
             }
         });
