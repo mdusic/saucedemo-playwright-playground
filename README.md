@@ -2,6 +2,148 @@
 
 End-to-end test automation suite for SauceDemo using Playwright.
 
+## 📋 Table of Contents
+
+- [Quick Start](#-quick-start)
+- [Project Structure](#-project-structure)
+- [Running Tests](#-running-tests)
+- [Page Object Model](#-page-object-model-best-practices)
+- [Branching Strategy](#-branching-strategy)
+- [Development Workflow](#-development-workflow)
+- [Pull Request Guidelines](#-pull-request-guidelines)
+- [CI/CD](#-cicd)
+- [Test Tags](#-test-tags)
+- [Performance Testing](#-performance-testing)
+- [Troubleshooting](#-troubleshooting)
+
+## 🚀 Quick Start
+
+Follow these steps to get started with the project:
+
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd saucedemo-playwright-playground
+
+# 2. Install dependencies
+npm install
+
+# 3. Run the tests in headed mode to see the browser
+npm run test:headed
+
+# 4. View the test report
+npm run report
+```
+
+### Prerequisites
+
+- Node.js 14 or higher
+- npm or yarn
+- Git
+
+## 🏗️ Project Structure
+
+```
+├── tests/                  # Test files
+│   ├── e2e/                # End-to-end test specs
+│   │   ├── login.spec.ts   # Login functionality tests
+│   │   ├── product-catalog.spec.ts # Product catalog tests
+│   │   └── ...
+│   ├── data/               # Test data and fixtures
+│   ├── helpers/            # Helper functions for tests
+│   ├── locators/           # Selector definitions
+│   └── utils/              # Utility functions and test extensions
+├── pages/                  # Page Object Models
+│   ├── BasePage.ts         # Base page with common functionality
+│   ├── LoginPage.ts        # Login page actions and verifications
+│   └── ...
+├── .github/
+│   └── workflows/          # GitHub Actions CI configuration
+├── playwright.config.ts    # Playwright configuration
+└── package.json            # Project dependencies and scripts
+```
+
+## 🧪 Running Tests
+
+This project includes different test groups that can be run separately:
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in headed mode (with browser visible)
+npm run test:headed
+
+# Run only smoke tests (critical path)
+npm run test:smoke
+
+# Run only regression tests
+npm run test:regression
+
+# Run tests with UI mode for debugging
+npm run test:ui
+
+# Run tests with interactive debugging
+npm run test:debug
+
+# Run visual tests
+npm run test:visual
+
+# Generate test code from UI interactions
+npm run codegen
+```
+
+### Test Results and Reports
+
+To view the HTML report after test execution:
+
+```bash
+npm run report
+```
+
+The report will open in your default browser and show test results with screenshots for failures.
+
+## 🧪 Page Object Model Best Practices
+
+1. **Selector Priority**
+   - Use data-test attributes as the first choice: `[data-test="login-button"]`
+   - Use ARIA roles when appropriate: `getByRole('button', { name: 'Open Menu' })`
+   - Only use classes/IDs when no better option exists
+
+2. **Page Object Structure**
+   ```typescript
+   class ProductsPage {
+     // Selectors as private readonly fields
+     private readonly addToCartButton = '[data-test="add-to-cart"]';
+     
+     // Simple, focused methods
+     async addProductToCart(productName: string) {
+       const selector = `[data-test="add-to-cart-${productName}"]`;
+       await this.clickFirstElement(selector);
+     }
+     
+     // Methods return promises when async
+     async getCartQuantity(): Promise<number> {
+       return await this.page.locator(this.removeButtons).count();
+     }
+   }
+   ```
+
+3. **Test Structure**
+   ```typescript
+   test('should add product to cart @smoke', async () => {
+     // Given: Start from a known state
+     await loginPage.login(username, password);
+     
+     // When: Perform the action
+     await productsPage.addProductToCart('Sauce Labs Backpack');
+     
+     // Then: Verify the result
+     const quantity = await productsPage.getCartQuantity();
+     expect(quantity).toBe(1, 'Cart should show 1 item');
+   });
+   ```
+
 ## 🌳 Branching Strategy
 
 We follow a simplified GitFlow strategy:
@@ -55,60 +197,6 @@ fix(checkout): resolve flaky payment validation
 3. Commit changes with meaningful messages
 4. Push your branch and create a PR to `develop`
 
-## 🏗️ Project Structure
-
-```
-├── tests/
-│   ├── e2e/                 # End-to-end test specs
-│   ├── data/               # Test data and fixtures
-│   └── utils/              # Test utilities
-├── pages/                  # Page Object Models
-├── .github/
-│   └── workflows/          # GitHub Actions
-└── playwright.config.ts    # Playwright configuration
-```
-
-## 🧪 Page Object Model Best Practices
-
-1. **Selector Priority**
-   - Use data-test attributes as the first choice: `[data-test="login-button"]`
-   - Use ARIA roles when appropriate: `getByRole('button', { name: 'Open Menu' })`
-   - Only use classes/IDs when no better option exists
-
-2. **Page Object Structure**
-   ```typescript
-   class ProductsPage {
-     // Selectors as private readonly fields
-     private readonly addToCartButton = '[data-test="add-to-cart"]';
-     
-     // Simple, focused methods
-     async addProductToCart(productName: string) {
-       const selector = `[data-test="add-to-cart-${productName}"]`;
-       await this.clickFirstElement(selector);
-     }
-     
-     // Methods return promises when async
-     async getCartQuantity(): Promise<number> {
-       return await this.page.locator(this.removeButtons).count();
-     }
-   }
-   ```
-
-3. **Test Structure**
-   ```typescript
-   test('should add product to cart @smoke', async () => {
-     // Given: Start from a known state
-     await loginPage.login(username, password);
-     
-     // When: Perform the action
-     await productsPage.addProductToCart('Sauce Labs Backpack');
-     
-     // Then: Verify the result
-     const quantity = await productsPage.getCartQuantity();
-     expect(quantity).toBe(1, 'Cart should show 1 item');
-   });
-   ```
-
 ## 🔍 Pull Request Guidelines
 
 1. PR Title Format: `[Type] Description`
@@ -145,6 +233,8 @@ We use the following tags to organize our tests:
 - `@regression`: Comprehensive tests for thorough validation
 - `@visual`: Visual regression tests
 - `@api`: API integration tests
+- `@performance`: Performance-related tests
+- `@resilience`: Tests that verify behavior under problematic conditions
 
 Run specific test suites:
 
@@ -157,6 +247,7 @@ npm run test:regression
 
 # Run all tests
 npm run test
+```
 
 ## 🚀 Performance Testing
 
@@ -179,11 +270,6 @@ Our test suite includes performance and resilience tests for different user type
    - Click response time: < 2000ms
    - Expected to have image loading issues
 
-### Performance Test Tags
-
-- `@performance`: Tests that verify loading times and responsiveness
-- `@resilience`: Tests that verify behavior under problematic conditions
-
 Run performance tests:
 ```bash
 # Run all performance tests
@@ -193,42 +279,41 @@ npm test tests/e2e/performance.spec.ts
 npx playwright test --grep @performance
 ```
 
-### Performance Testing Strategy
+## 🔧 Troubleshooting
 
-1. **Page Load Performance**
-   - Measures time from navigation start to first image visible
-   - Adapts expectations based on user type
-   - Handles network state differently for performance user
+### Common Issues
 
-2. **Click Performance**
-   - Uses retry mechanism with exponential backoff
-   - Verifies both success and timing of interactions
-   - Adjusts retry attempts based on user type
+1. **Tests fail due to timeouts**
+   - Check the application performance
+   - Increase timeout values in `playwright.config.ts`
+   - Use retry mechanisms for flaky elements
 
-3. **Image Loading**
-   - Verifies image visibility and proper loading
-   - Checks image dimensions for standard user
-   - Handles expected failures for problem user
-   - Ensures eventual loading for performance user
+2. **Selector not found errors**
+   - Verify the selector is correct and exists in the application
+   - Use the Playwright Inspector (`npm run test:debug`) to debug
+   - Consider using more reliable selectors (data-test attributes)
 
-### Helper Functions
+3. **Visual differences**
+   - Check if the application UI has changed
+   - Update visual baseline using `--update-snapshots` flag
 
-The `performanceHelpers` module provides utilities for:
-- Retrying actions with exponential backoff
-- Checking image load status
-- Verifying image dimensions
+### Debug Strategies
 
-Example usage:
-```typescript
-// Retry clicking with exponential backoff
-const result = await performanceHelpers.retryClick(page, selector, {
-    maxAttempts: 3,
-    initialDelay: 100,
-    maxDelay: 1000
-});
+1. **Use Playwright UI Mode**
+   ```bash
+   npm run test:ui
+   ```
 
-// Check if image is properly loaded
-const isLoaded = await performanceHelpers.checkImageLoaded(page, selector);
+2. **Use Playwright Inspector**
+   ```bash 
+   npm run test:debug
+   ```
 
-// Get image dimensions
-const dimensions = await performanceHelpers.getImageDimensions(page, selector);
+3. **Enable Verbose Logging**
+   ```bash
+   DEBUG=pw:api npm test
+   ```
+
+4. **Examine Traces and Screenshots**
+   - Check the `test-results` directory for traces
+   - Use the HTML report to examine failures

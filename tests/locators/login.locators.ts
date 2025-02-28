@@ -1,5 +1,8 @@
 /**
  * Login page locators
+ * 
+ * Contains all selectors needed for interacting with the login page.
+ * Using data-test attributes wherever possible for reliability.
  */
 export const loginLocators = {
     // Input fields
@@ -13,5 +16,8 @@ export const loginLocators = {
 
     // Information elements
     credentialsList: '[data-test="login-credentials"]',
-    passwordInfo: '[data-test="login-password"]'
+    passwordInfo: '[data-test="login-password"]',
+    
+    // Page elements
+    pageTitle: '.title' // Added for consistency with other page elements
 } as const;

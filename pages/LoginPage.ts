@@ -1,18 +1,14 @@
 import { Page, expect } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { loginLocators } from '../tests/locators/login.locators';
 
 /**
  * Page Object Model class for the Login page
  * Contains all interactions and verifications for the login functionality
  */
 export class LoginPage extends BasePage {
-    // Selectors using data-test attributes for better maintainability
-    private readonly usernameInput = '[data-test="username"]';
-    private readonly passwordInput = '[data-test="password"]';
-    private readonly loginButton = '[data-test="login-button"]';
-    private readonly errorMessage = '[data-test="error"]';
-    private readonly inventoryContainer = '[data-test="inventory-container"]';
-    private readonly pageTitle = '.title';
+    // No need to redefine locators that are already in the locators file
+    // We'll use them directly from the imported loginLocators
 
     constructor(page: Page) {
         super(page);
@@ -27,7 +23,8 @@ export class LoginPage extends BasePage {
     }
 
     /**
-     * Perform login with provided credentials
+     * Perform complete login with provided credentials
+     * This is the recommended method for most test cases when you need to perform a standard login
      * @param username - Username to login with
      * @param password - Password to login with
      */
@@ -39,25 +36,31 @@ export class LoginPage extends BasePage {
 
     /**
      * Enter username in the username field
+     * Only use this method instead of login() when you need to perform specific steps separately,
+     * such as for negative tests or special interaction testing
      * @param username - Username to enter
      */
     async enterUsername(username: string) {
-        await this.typeWithDelay(this.usernameInput, username);
+        await this.typeWithDelay(loginLocators.usernameInput, username);
     }
 
     /**
      * Enter password in the password field
+     * Only use this method instead of login() when you need to perform specific steps separately,
+     * such as for negative tests or special interaction testing
      * @param password - Password to enter
      */
     async enterPassword(password: string) {
-        await this.typeWithDelay(this.passwordInput, password);
+        await this.typeWithDelay(loginLocators.passwordInput, password);
     }
 
     /**
      * Click the login button
+     * Only use this method instead of login() when you need to perform specific steps separately,
+     * such as for negative tests or special interaction testing
      */
     async clickLogin() {
-        await this.page.click(this.loginButton);
+        await this.page.click(loginLocators.loginButton);
     }
 
     /**
@@ -65,7 +68,7 @@ export class LoginPage extends BasePage {
      * @returns Promise<string | null> - Error message text or null if not present
      */
     async getErrorMessage(): Promise<string | null> {
-        const errorElement = this.page.locator(this.errorMessage);
+        const errorElement = this.page.locator(loginLocators.errorMessage);
         if (await errorElement.isVisible()) {
             return errorElement.textContent();
         }
@@ -76,25 +79,25 @@ export class LoginPage extends BasePage {
      * Wait for the login form to be visible
      */
     private async waitForLoginForm() {
-        await this.waitForElement(this.usernameInput);
-        await this.waitForElement(this.passwordInput);
-        await this.waitForElement(this.loginButton);
+        await this.waitForElement(loginLocators.usernameInput);
+        await this.waitForElement(loginLocators.passwordInput);
+        await this.waitForElement(loginLocators.loginButton);
     }
 
     /**
      * Verify that we're on the login page
      */
     async verifyLoginPage() {
-        await expect(this.page.locator(this.usernameInput)).toBeVisible();
-        await expect(this.page.locator(this.passwordInput)).toBeVisible();
-        await expect(this.page.locator(this.loginButton)).toBeVisible();
+        await expect(this.page.locator(loginLocators.usernameInput)).toBeVisible();
+        await expect(this.page.locator(loginLocators.passwordInput)).toBeVisible();
+        await expect(this.page.locator(loginLocators.loginButton)).toBeVisible();
     }
 
     /**
      * Get the page title text
      */
     async getPageTitle(): Promise<string | null> {
-        const titleElement = this.page.locator(this.pageTitle);
+        const titleElement = this.page.locator(loginLocators.pageTitle);
         if (await titleElement.isVisible()) {
             return titleElement.textContent();
         }
@@ -105,6 +108,6 @@ export class LoginPage extends BasePage {
      * Check if error message is visible
      */
     async isErrorMessageVisible(): Promise<boolean> {
-        return this.page.locator(this.errorMessage).isVisible();
+        return this.page.locator(loginLocators.errorMessage).isVisible();
     }
 }
