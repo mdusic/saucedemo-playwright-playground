@@ -15,6 +15,7 @@ End-to-end test automation suite for SauceDemo using Playwright.
 - [Test Tags](#-test-tags)
 - [Performance Testing](#-performance-testing)
 - [Troubleshooting](#-troubleshooting)
+- [AI-Assisted Development](#-ai-assisted-development)
 
 ## 🚀 Quick Start
 
@@ -317,3 +318,28 @@ npx playwright test --grep @performance
 4. **Examine Traces and Screenshots**
    - Check the `test-results` directory for traces
    - Use the HTML report to examine failures
+
+## 🤖 AI-Assisted Development
+
+This project incorporates AI tooling to enhance the development and learning experience:
+
+### Windsurf Rules and Memories
+
+We've set up Windsurf rules and Cascade memories primarily as a learning opportunity and to explore how AI tooling can be integrated into test automation projects. These tools serve multiple purposes:
+
+1. **Knowledge Transfer**: AI can help new team members understand project conventions and best practices quickly
+2. **Consistency**: Rules help maintain consistent coding patterns across the project
+3. **Learning Aid**: For beginners, AI assistance provides contextual guidance about Playwright testing concepts
+4. **Efficiency**: Experienced automation engineers can leverage AI to handle repetitive tasks
+
+Our approach treats AI not as a replacement for human expertise, but as a collaborative tool that enhances both learning and productivity. This is especially valuable in an educational project like this one, where the goal is to help people at different skill levels understand test automation concepts.
+
+The rules we've established cover:
+- Playwright testing principles
+- Locator strategy best practices
+- Documentation standards
+- Error handling approaches
+- Educational focus reminders
+- Git workflow guidelines
+
+> Note: Windsurf rules are kept in the `.windsurfrules` file, which is excluded from version control as it's specific to the local development environment.
