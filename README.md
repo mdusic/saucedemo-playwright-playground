@@ -8,6 +8,7 @@ End-to-end test automation suite for SauceDemo using Playwright.
 - [Project Structure](#-project-structure)
 - [Running Tests](#-running-tests)
 - [Page Object Model](#-page-object-model-best-practices)
+- [Visual Testing](#-visual-testing)
 - [Branching Strategy](#-branching-strategy)
 - [Development Workflow](#-development-workflow)
 - [Pull Request Guidelines](#-pull-request-guidelines)
@@ -144,6 +145,69 @@ The report will open in your default browser and show test results with screensh
      expect(quantity).toBe(1, 'Cart should show 1 item');
    });
    ```
+
+## 🖼️ Visual Testing
+
+Visual testing is a crucial part of our test automation strategy, allowing us to verify the visual appearance of the application across different user types, viewport sizes, and UI states.
+
+### Visual Testing Approach
+
+1. **User Type Comparisons**
+   - We maintain baselines for different user types (standard_user, problem_user, performance_glitch_user)
+   - Tests compare visual differences between user types to identify issues
+   - Problem user tests intentionally highlight visual discrepancies for educational purposes
+
+2. **Responsive Design Testing**
+   - Tests verify application appearance across different viewport sizes (desktop, tablet, mobile)
+   - Ensures consistent user experience across devices
+   - Documents responsive behavior for educational purposes
+
+3. **UI State Testing**
+   - Captures different states of UI components (empty vs. filled cart, form states, etc.)
+   - Verifies visual consistency across state changes
+   - Documents expected visual differences between states
+
+### Running Visual Tests
+
+Visual tests are configured to run only in the dedicated `visual-tests` project to avoid cross-browser comparison issues:
+
+```bash
+# Run all visual tests
+npx playwright test --project=visual-tests
+
+# Update visual baselines after intentional UI changes
+npx playwright test --project=visual-tests --update-snapshots
+
+# Run specific visual test files
+npx playwright test tests/visual/ui-states.visual.spec.ts --project=visual-tests
+```
+
+### Visual Testing in CI/CD
+
+For CI/CD integration:
+
+1. **Baseline Management**
+   - Baselines are stored in version control
+   - CI pipeline uses these baselines for comparison
+   - Update baselines when intentional UI changes occur
+
+2. **CI Configuration**
+   - Visual tests run as a separate job in the pipeline
+   - Results are reported with visual diffs for failed tests
+   - Consider using a dedicated visual testing service for more advanced needs
+
+3. **Best Practices**
+   - Keep baselines up to date with intentional UI changes
+   - Use masks for dynamic content that changes between runs
+   - Document expected visual differences in test files
+
+### Educational Value
+
+Our visual testing implementation demonstrates:
+- How to set up visual testing in a Playwright project
+- How to handle expected visual differences between user types
+- Best practices for organizing and maintaining visual tests
+- Techniques for testing responsive design and UI states
 
 ## 🌳 Branching Strategy
 
