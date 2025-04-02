@@ -362,6 +362,34 @@ npx playwright test --grep @performance
    - Check if the application UI has changed
    - Update visual baseline using `--update-snapshots` flag
 
+### Visual Testing in CI/CD Environments
+
+Visual testing across different operating systems presents unique challenges. Our CI/CD pipeline handles this with a dedicated approach:
+
+1. **OS-Specific Snapshots**
+   - Snapshots are OS-specific (e.g., `-darwin.png` for macOS, `-linux.png` for Linux)
+   - CI environment automatically generates its own baseline snapshots
+
+2. **CI/CD Configuration**
+   - Visual tests run in a separate job after functional tests
+   - The workflow first updates snapshots, then runs tests against those snapshots
+   - Snapshots are uploaded as artifacts for review
+
+3. **Handling Visual Test Failures in CI**
+   - If visual tests fail in CI but pass locally, check the CI-generated snapshots in artifacts
+   - Compare against your local snapshots to identify platform-specific differences
+   - For legitimate differences, consider using more flexible matching options:
+     ```typescript
+     await expect(page).toHaveScreenshot('example.png', {
+       threshold: 0.2, // Allow 20% pixel difference
+       maxDiffPixelRatio: 0.1 // Allow 10% of pixels to be different
+     });
+     ```
+
+4. **Manually Updating CI Snapshots**
+   - Run the workflow manually via GitHub Actions "workflow_dispatch" trigger
+   - Review the updated snapshots in the artifacts
+
 ### Debug Strategies
 
 1. **Use Playwright UI Mode**
