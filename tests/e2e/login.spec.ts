@@ -3,7 +3,7 @@ import { LoginPage } from '../../pages/LoginPage';
 import { users, loginErrors } from '../data/users.data';
 import { loginLocators } from '../locators/login.locators';
 import { inventoryLocators } from '../locators/inventory.locators';
-import { test } from '../utils/test-helpers';
+import { test } from '../helpers/test-helpers';
 
 /**
  * Test suite for login functionality

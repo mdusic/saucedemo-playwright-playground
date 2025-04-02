@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { test } from '../utils/test-helpers';
+import { test } from '../helpers/test-helpers';
 import { inventoryLocators } from '../locators/inventory.locators';
 import { cartLocators } from '../locators/cart.locators';
 import { cartHelpers } from '../helpers';
