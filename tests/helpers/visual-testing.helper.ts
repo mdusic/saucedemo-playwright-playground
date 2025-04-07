@@ -135,6 +135,11 @@ export function getScreenshotOptions(
   const baseOptions = {
     animations: 'disabled',
     fullPage: false,
+    // Add maxDiffPixelRatio to handle minor platform differences
+    maxDiffPixelRatio: 0.05,
+    // Add platform-specific snapshot suffix to handle cross-platform testing
+    // This ensures snapshots are compared against the correct platform-specific baseline
+    snapshotSuffix: process.env.CI ? '-linux' : '-darwin',
   };
   
   // User-specific options

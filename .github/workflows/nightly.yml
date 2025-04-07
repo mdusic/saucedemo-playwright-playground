@@ -31,7 +31,12 @@ jobs:
     
     - name: Run tests across all browsers
       run: npx playwright test
-      
+      env:
+        CI: true
+        BASE_URL: https://www.saucedemo.com
+        # Set a consistent platform identifier for CI snapshots
+        PLAYWRIGHT_SNAPSHOT_SUFFIX: -linux
+    
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v4
