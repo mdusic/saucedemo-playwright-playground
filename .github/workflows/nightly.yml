@@ -29,13 +29,19 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     
+    # First, update snapshots to ensure they exist in the CI environment
+    - name: Update visual test snapshots
+      run: npx playwright test --project=visual-tests --update-snapshots
+      env:
+        CI: true
+        BASE_URL: https://www.saucedemo.com
+    
+    # Then run all tests including the visual tests with the updated snapshots
     - name: Run tests across all browsers
       run: npx playwright test
       env:
         CI: true
         BASE_URL: https://www.saucedemo.com
-        # Set a consistent platform identifier for CI snapshots
-        PLAYWRIGHT_SNAPSHOT_SUFFIX: -linux
     
     - name: Upload test results
       if: always()

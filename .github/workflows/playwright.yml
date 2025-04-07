@@ -75,14 +75,12 @@ jobs:
       env:
         CI: true
         BASE_URL: https://www.saucedemo.com
-        PLAYWRIGHT_SNAPSHOT_SUFFIX: -linux
 
     - name: Run visual tests with updated snapshots
       run: npx playwright test --project=visual-tests
       env:
         CI: true
         BASE_URL: https://www.saucedemo.com
-        PLAYWRIGHT_SNAPSHOT_SUFFIX: -linux
 
     - name: Upload visual test results
       if: always()
