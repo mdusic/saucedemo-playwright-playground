@@ -41,16 +41,19 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: /.*visual\.spec\.ts/,  // Ignore visual tests in regular browser projects
     },
 
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
+      testIgnore: /.*visual\.spec\.ts/,  // Ignore visual tests in regular browser projects
     },
 
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
+      testIgnore: /.*visual\.spec\.ts/,  // Ignore visual tests in regular browser projects
     },
 
     {
