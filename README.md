@@ -4,6 +4,7 @@ End-to-end test automation suite for SauceDemo using Playwright.
 
 ## 📋 Table of Contents
 
+- [Latest Release](#-latest-release)
 - [Quick Start](#-quick-start)
 - [Project Structure](#-project-structure)
 - [Running Tests](#-running-tests)
@@ -17,6 +18,26 @@ End-to-end test automation suite for SauceDemo using Playwright.
 - [Performance Testing](#-performance-testing)
 - [Troubleshooting](#-troubleshooting)
 - [AI-Assisted Development](#-ai-assisted-development)
+
+## 🚀 Latest Release
+
+### v1.1.0 - Visual Testing Improvements and Code Organization
+
+This release includes several significant improvements:
+
+#### Visual Testing Enhancements
+- **Cross-Platform Compatibility**: Robust visual testing that works reliably in both local and CI environments
+- **Adaptive Thresholds**: Different threshold settings for different user types (0.3 for problem_user, 0.1 for standard/performance users)
+- **Comprehensive Test Suite**: Added visual tests for product catalog, details, UI states, and responsive design
+
+#### Code Organization Improvements
+- **Improved Structure**: Moved test-helpers from utils to helpers directory following best practices
+- **Enhanced Documentation**: Added detailed JSDoc comments throughout the codebase
+- **Consistent Patterns**: Standardized implementation patterns across test files
+
+#### CI/CD Improvements
+- **Reliable Visual Testing**: Updated GitHub Actions workflows for more consistent testing
+- **Snapshot Management**: Improved handling of snapshots in CI environments
 
 ## 🚀 Quick Start
 
@@ -50,11 +71,14 @@ npm run report
 │   ├── e2e/                # End-to-end test specs
 │   │   ├── login.spec.ts   # Login functionality tests
 │   │   ├── product-catalog.spec.ts # Product catalog tests
+│   │   ├── checkout.spec.ts # Checkout flow tests
+│   │   ├── performance.spec.ts # Performance testing
 │   │   └── ...
 │   ├── data/               # Test data and fixtures
-│   ├── helpers/            # Helper functions for tests
-│   ├── locators/           # Selector definitions
-│   └── utils/              # Utility functions and test extensions
+│   ├── helpers/            # Helper functions for tests (login, test utilities, etc.)
+│   ├── locators/           # Selector definitions (organized by page/component)
+│   ├── utils/              # General utility functions
+│   └── visual/             # Visual testing specs and snapshots
 ├── pages/                  # Page Object Models
 │   ├── BasePage.ts         # Base page with common functionality
 │   ├── LoginPage.ts        # Login page actions and verifications
@@ -186,20 +210,22 @@ npx playwright test tests/visual/ui-states.visual.spec.ts --project=visual-tests
 
 For CI/CD integration:
 
-1. **Baseline Management**
-   - Baselines are stored in version control
-   - CI pipeline uses these baselines for comparison
-   - Update baselines when intentional UI changes occur
+1. **Cross-Platform Compatibility**
+   - Visual tests are configured to handle platform-specific rendering differences
+   - Appropriate thresholds are set for different user types (0.3 for problem_user, 0.1 for standard/performance users)
+   - `maxDiffPixelRatio` is set to 0.1 to handle minor platform differences
 
 2. **CI Configuration**
    - Visual tests run as a separate job in the pipeline
+   - CI workflow first updates snapshots before running tests against them
    - Results are reported with visual diffs for failed tests
-   - Consider using a dedicated visual testing service for more advanced needs
+   - Snapshots are uploaded as artifacts for review
 
 3. **Best Practices**
    - Keep baselines up to date with intentional UI changes
    - Use masks for dynamic content that changes between runs
    - Document expected visual differences in test files
+   - Set appropriate thresholds based on user type and expected variations
 
 ### Educational Value
 
@@ -413,7 +439,7 @@ Visual testing across different operating systems presents unique challenges. Ou
 
 ## 🤖 AI-Assisted Development
 
-This project incorporates AI tooling to enhance the development and learning experience:
+This project incorporates AI tooling to enhance the development and learning experience, aligning with our educational focus:
 
 ### Windsurf Rules and Memories
 
@@ -426,12 +452,25 @@ We've set up Windsurf rules and Cascade memories primarily as a learning opportu
 
 Our approach treats AI not as a replacement for human expertise, but as a collaborative tool that enhances both learning and productivity. This is especially valuable in an educational project like this one, where the goal is to help people at different skill levels understand test automation concepts.
 
+### Recent AI-Assisted Improvements
+
+Some examples of how AI has enhanced our project:
+
+1. **Visual Testing Configuration**: AI helped develop a robust cross-platform visual testing solution that works reliably in both local and CI environments
+2. **Code Organization**: Assisted in refactoring the project structure to follow best practices, such as moving test helpers to the appropriate directory
+3. **Documentation Enhancement**: Generated comprehensive JSDoc comments for helper functions to make the codebase more educational
+4. **Test Pattern Recognition**: Identified common patterns across test files and suggested consistent implementations
+
+### AI Rules and Guidelines
+
 The rules we've established cover:
-- Playwright testing principles
-- Locator strategy best practices
-- Documentation standards
-- Error handling approaches
-- Educational focus reminders
-- Git workflow guidelines
+- Playwright testing principles (TypeScript usage, Page Object Model patterns)
+- Locator strategy best practices (prioritizing data-test attributes, ARIA roles)
+- Code organization principles (DRY principle, helper functions, reusable components)
+- Documentation standards (JSDoc comments, educational explanations)
+- Error handling approaches (detailed error messages, retry mechanisms)
+- Educational focus reminders (beginner-friendly code, explained concepts)
+- Git workflow guidelines (branch naming, commit message format)
+- Visual testing principles (separate visual test files, responsive design testing)
 
 > Note: Windsurf rules are kept in the `.windsurfrules` file, which is excluded from version control as it's specific to the local development environment.
